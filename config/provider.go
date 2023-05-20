@@ -8,9 +8,9 @@ import (
 	// Note(turkenh): we are importing this to embed provider schema document
 	_ "embed"
 
+	"github.com/turkenf/provider-launchdarkly/config/flag"
+	"github.com/turkenf/provider-launchdarkly/config/project"
 	ujconfig "github.com/upbound/upjet/pkg/config"
-
-	"github.com/turkenf/provider-launchdarkly/config/null"
 )
 
 const (
@@ -35,7 +35,8 @@ func GetProvider() *ujconfig.Provider {
 
 	for _, configure := range []func(provider *ujconfig.Provider){
 		// add custom config functions
-		null.Configure,
+		flag.Configure,
+		project.Configure,
 	} {
 		configure(pc)
 	}

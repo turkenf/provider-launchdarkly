@@ -9,7 +9,6 @@ import (
 
 	"github.com/upbound/upjet/pkg/controller"
 
-	resource "github.com/turkenf/provider-launchdarkly/internal/controller/null/resource"
 	providerconfig "github.com/turkenf/provider-launchdarkly/internal/controller/providerconfig"
 )
 
