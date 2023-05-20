@@ -1,4 +1,4 @@
-module github.com/upbound/upjet-provider-template
+module github.com/turkenf/provider-launchdarkly
 
 go 1.19
 

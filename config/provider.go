@@ -10,12 +10,12 @@ import (
 
 	ujconfig "github.com/upbound/upjet/pkg/config"
 
-	"github.com/upbound/upjet-provider-template/config/null"
+	"github.com/turkenf/provider-launchdarkly/config/null"
 )
 
 const (
-	resourcePrefix = "template"
-	modulePath     = "github.com/upbound/upjet-provider-template"
+	resourcePrefix = "launchdarkly"
+	modulePath     = "github.com/turkenf/provider-launchdarkly"
 )
 
 //go:embed schema.json
