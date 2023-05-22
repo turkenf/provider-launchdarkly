@@ -9,6 +9,8 @@ import (
 
 	"github.com/upbound/upjet/pkg/controller"
 
+	flag "github.com/turkenf/provider-launchdarkly/internal/controller/flag/flag"
+	project "github.com/turkenf/provider-launchdarkly/internal/controller/project/project"
 	providerconfig "github.com/turkenf/provider-launchdarkly/internal/controller/providerconfig"
 )
 
@@ -16,7 +18,8 @@ import (
 // the supplied manager.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	for _, setup := range []func(ctrl.Manager, controller.Options) error{
-		resource.Setup,
+		flag.Setup,
+		project.Setup,
 		providerconfig.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {

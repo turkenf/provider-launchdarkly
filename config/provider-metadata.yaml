@@ -1,9 +1,911 @@
-name: hashicorp/null
+name: launchdarkly/launchdarkly
 resources:
-    null_resource Resource - terraform-provider-null:
+    launchdarkly_access_token:
         subCategory: ""
-        description: The null_resource resource implements the standard resource lifecycle but takes no further action. The triggers argument allows specifying an arbitrary set of values that, when changed, will cause the resource to be replaced.
-        name: null_resource Resource - terraform-provider-null
-        title: null_resource Resource - terraform-provider-null
-        argumentDocs: {}
+        description: Create and manage LaunchDarkly access tokens.
+        name: launchdarkly_access_token
+        title: launchdarkly_access_token
+        examples:
+            - name: reader_token
+              manifest: |-
+                {
+                  "name": "Reader token managed by Terraform",
+                  "role": "reader"
+                }
+            - name: custom_role_token
+              manifest: |-
+                {
+                  "custom_roles": [
+                    "ops"
+                  ],
+                  "name": "DevOps"
+                }
+            - name: token_with_policy_statements
+              manifest: |-
+                {
+                  "inline_roles": [
+                    {
+                      "actions": [
+                        "*"
+                      ],
+                      "effect": "deny",
+                      "resources": [
+                        "proj/*:env/production"
+                      ]
+                    }
+                  ],
+                  "name": "Integration service token",
+                  "service_token": true
+                }
+        argumentDocs:
+            custom_roles: '- (Optional) A list of custom role IDs to use as access limits for the access token'
+            default_api_version: '- (Optional) The default API version for this token. Defaults to the latest API version. A change in this field will force the destruction of the existing token in state and the creation of a new one.'
+            id: '- The unique access token ID.'
+            inline_role: '- (Optional) Define inline custom roles. An array of statements represented as config blocks with three attributes: effect, resources, actions. May be used in place of a built-in or custom role. Using polices. May be specified more than once.'
+            name: '- (Optional) A human-friendly name for the access token.'
+            policy_statements: '- (Optional, Deprecated) Define inline custom roles. An array of statements represented as config blocks with three attributes: effect, resources, actions. May be used in place of a built-in or custom role. May be specified more than once. This field argument is deprecated. Update your config to use inline_role to maintain compatibility with future versions.'
+            policy_statements.actions: '- (Optional) The list of action specifiers defining the actions to which the statement applies.'
+            policy_statements.effect: '- (Required) - Either allow or deny. This argument defines whether the statement allows or denies access to the named resources and actions.'
+            policy_statements.expire: '- (Optional, Deprecated) An expiration time for the current token secret, expressed as a Unix epoch time. Replace the computed token secret with a new value. The expired secret will no longer be able to authorize usage of the LaunchDarkly API. This field argument is deprecated. Please update your config to remove expire to maintain compatibility with future versions.'
+            policy_statements.not_actions: '- (Optional) The list of action specifiers defining the actions to which the statement does not apply.'
+            policy_statements.not_resources: '- (Optional) - The list of resource specifiers defining the resources to which the statement does not apply.'
+            policy_statements.resources: '- (Optional) - The list of resource specifiers defining the resources to which the statement applies.'
+            role: '- (Optional) A built-in LaunchDarkly role. Can be reader, writer, or admin'
+            service_token: '- (Optional) Whether the token will be a service token. A change in this field will force the destruction of the existing token and the creation of a new one.'
+            token: '- The access token used to authorize usage of the LaunchDarkly API.'
+        importStatements: []
+    launchdarkly_audit_log_subscription:
+        subCategory: ""
+        description: Create and manage LaunchDarkly integration audit log subscriptions.
+        name: launchdarkly_audit_log_subscription
+        title: launchdarkly_audit_log_subscription
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "config": [
+                    {
+                      "api_key": "yoursecretkey",
+                      "host_url": "https://api.datadoghq.com"
+                    }
+                  ],
+                  "integration_key": "datadog",
+                  "name": "Example Datadog Subscription",
+                  "statements": [
+                    {
+                      "actions": [
+                        "*"
+                      ],
+                      "effect": "allow",
+                      "resources": [
+                        "proj/*:env/*:flag/*"
+                      ]
+                    }
+                  ],
+                  "tags": [
+                    "integrations",
+                    "terraform"
+                  ]
+                }
+        argumentDocs:
+            config: '(Required) - The set of configuration fields corresponding to the value defined for integration_key. Refer to the "formVariables" field in the corresponding integrations/<integration_key>/manifest.json file in this repo for a full list of fields for the integration you wish to configure. IMPORTANT: Please note that Terraform will only accept these in snake case, regardless of the case shown in the manifest.'
+            integration_key: (Required) The integration key. As of January 2022, supported integrations are "datadog", "dynatrace", "elastic", "honeycomb", "logdna", "msteams", "new-relic-apm", "signalfx", "slack", and "splunk". A change in this field will force the destruction of the existing resource and the creation of a new one.
+            name: (Required) - A human-friendly name for your audit log subscription viewable from within the LaunchDarkly Integrations page.
+            "on": (Required) - Whether or not you want your subscription enabled, i.e. to actively send events.
+            statements: (Required) - A block representing the resources to which you wish to subscribe. To learn more about how to configure these blocks, read Nested Subscription Statements Blocks.
+            statements.actions: The list of action specifiers defining the actions to which the statement applies. For a list of available actions, read Using actions.
+            statements.effect: (Required) - Either allow or deny. This argument defines whether the statement allows or denies access to the named resources and actions.
+            statements.not_actions: The list of action specifiers defining the actions to which the statement does not apply. For a list of available actions, read Using actions.
+            statements.not_resources: '- The list of resource specifiers defining the resources to which the statement does not apply. To learn more about how to configure these, read Using resources.'
+            statements.resources: '- The list of resource specifiers defining the resources to which the statement applies. To learn more about how to configure these, read Using resources.'
+            tags: (Optional) - Set of tags associated with the subscription object.
+        importStatements: []
+    launchdarkly_custom_role:
+        subCategory: ""
+        description: Create and manage LaunchDarkly custom roles.
+        name: launchdarkly_custom_role
+        title: launchdarkly_custom_role
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "This is an example role",
+                  "key": "example-role-key-1",
+                  "name": "example role",
+                  "policy_statements": [
+                    {
+                      "actions": [
+                        "*"
+                      ],
+                      "effect": "allow",
+                      "resources": [
+                        "proj/*:env/production:flag/*"
+                      ]
+                    },
+                    {
+                      "actions": [
+                        "*"
+                      ],
+                      "effect": "allow",
+                      "resources": [
+                        "proj/*:env/production"
+                      ]
+                    }
+                  ]
+                }
+        argumentDocs:
+            base_permissions: '- (Optional) The base permission level. Either reader or no_access. Defaults to reader if not set.'
+            description: '- (Optional) The description of the custom role.'
+            key: '- (Required) The unique key that references the custom role. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            name: '- (Required) The human-readable name for the custom role.'
+            policy_statements: '- (Required) The custom role policy block. To learn more, read Using policies.'
+            policy_statements.actions: '- (Optional) The list of action specifiers defining the actions to which the statement applies. Either actions or not_actions must be specified. For a list of available actions read Actions reference.'
+            policy_statements.effect: '- (Required) - Either allow or deny. This argument defines whether the statement allows or denies access to the named resources and actions.'
+            policy_statements.not_actions: '- (Optional) The list of action specifiers defining the actions to which the statement does not apply. Either actions or not_actions must be specified. For a list of available actions read Actions reference.'
+            policy_statements.not_resources: '- (Optional) - The list of resource specifiers defining the resources to which the statement does not apply. Either resources or not_resources must be specified. For a list of available resources read Understanding resource types and scopes.'
+            policy_statements.resources: '- (Optional) - The list of resource specifiers defining the resources to which the statement applies. Either resources or not_resources must be specified. For a list of available resources read Understanding resource types and scopes.'
+        importStatements: []
+    launchdarkly_destination:
+        subCategory: ""
+        description: Interact with the LaunchDarkly data export destinations API.
+        name: launchdarkly_destination
+        title: launchdarkly_destination
+        examples:
+            - name: kinesis_example
+              manifest: |-
+                {
+                  "config": {
+                    "region": "us-east-1",
+                    "role_arn": "arn:aws:iam::123456789012:role/marketingadmin",
+                    "stream_name": "cat-stream"
+                  },
+                  "env_key": "example-env",
+                  "kind": "kinesis",
+                  "name": "example-kinesis-dest",
+                  "on": true,
+                  "project_key": "example-project",
+                  "tags": [
+                    "terraform"
+                  ]
+                }
+            - name: pubsub_example
+              manifest: |-
+                {
+                  "config": {
+                    "project": "example-pub-sub-project",
+                    "topic": "example-topic"
+                  },
+                  "env_key": "example-env",
+                  "kind": "google-pubsub",
+                  "name": "example-pubsub-dest",
+                  "on": true,
+                  "project_key": "example-project",
+                  "tags": [
+                    "terraform"
+                  ]
+                }
+            - name: mparticle_example
+              manifest: |-
+                {
+                  "config": {
+                    "api_key": "apiKeyfromMParticle",
+                    "environment": "production",
+                    "secret": "mParticleSecret",
+                    "user_identities": "${jsonencode([\n      {\"ldContextKind\":\"user\",\"mparticleUserIdentity\":\"customer_id\"},\n      {\"ldContextKind\":\"device\",\"mparticleUserIdentity\":\"google\"}]\n\t\t)}"
+                  },
+                  "env_key": "example-env",
+                  "kind": "mparticle",
+                  "name": "example-mparticle-dest",
+                  "on": true,
+                  "project_key": "example-project",
+                  "tags": [
+                    "terraform"
+                  ]
+                }
+            - name: azure_example
+              manifest: |-
+                {
+                  "config": {
+                    "name": "example-azure-name",
+                    "namespace": "example-azure-namespace",
+                    "policy_key": "azure-event-hubs-policy-key",
+                    "policy_name": "example-policy-name"
+                  },
+                  "env_key": "example-env",
+                  "kind": "azure-event-hubs",
+                  "name": "example-azure-event-hubs-dest",
+                  "on": true,
+                  "project_key": "example-project",
+                  "tags": [
+                    "terraform"
+                  ]
+                }
+            - name: segment_example
+              manifest: |-
+                {
+                  "config": {
+                    "anonymous_id_context_kind": "anonymousUser",
+                    "user_id_context_kind": "user",
+                    "write_key": "segment-write-key"
+                  },
+                  "env_key": "example-env",
+                  "kind": "segment",
+                  "name": "example-segment-dest",
+                  "on": true,
+                  "project_key": "example-project",
+                  "tags": [
+                    "terraform"
+                  ]
+                }
+        argumentDocs:
+            anonymous_id_context_kind: '- (Required) - The context kind you would like to associated with anonymous user data exported to segment.'
+            api_key: '- (Required) - Your mParticle API key.'
+            config: '- (Required) - The destination-specific configuration. To learn more, read Destination-Specific Configs.'
+            env_key: '- (Required) - The environment key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            environment: '- (Required) - The mParticle environment. Must be ''production'' or ''development''.'
+            id: '- The data export destination ID.'
+            kind: '- (Required) - The data export destination type. Available choices are kinesis, google-pubsub, mparticle, azure-event-hubs, and segment. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            name: '- (Required) - A human-readable name for your data export destination.'
+            namespace: '- (Required) - The Azure namespace where you want LaunchDarkly to export events.'
+            "on": '- (Optional, previously enabled) - Whether the data export destination is on or not.'
+            policy_key: '- (Required) - Your Azure policy key. The name of your Azure policy. Follow the directions in the docs to set up a policy.'
+            policy_name: '- (Required) - The name of your Azure policy. Follow the directions in the docs to set up a policy.'
+            project: '- (Required) - The name of your Pub/Sub project.'
+            project_key: '- (Required) - The LaunchDarkly project key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            region: '- (Required) - AWS region your Kinesis resource resides in.'
+            role_arn: '- (Required) - Your AWS stream ARN in the format "arn:aws:iam::{account-id}:role/{role}", ex. "arn:aws:iam::123456789012:role/marketingadmin". Follow the directions in the docs to set up the necessary roles if need be.'
+            secret: '- (Required) - Your mParticle secret.'
+            stream_name: '- (Required) - The name of your Kinesis stream.'
+            topic: '- (Required) - The name of your Pub/Sub topic.'
+            user_id_context_kind: '- (Required) - The context kind you would like to associated with the data exported to segment.'
+            user_identities: '- (Optional) - A json-encoded list of objects associating mParticle user identities with LaunchDarkly context kinds. At least one of user_identity or user_identities must be defined.'
+            user_identity: '- (Optional) - Your mParticle user ID as a string. If defined, the LaunchDarkly context kind will be implicitly assumed to be "user". At least one of user_identity or user_identities must be defined.'
+            write_key: '- (Required) - Your Segment write key.'
+        importStatements: []
+    launchdarkly_environment:
+        subCategory: ""
+        description: Create and manage LaunchDarkly environments.
+        name: launchdarkly_environment
+        title: launchdarkly_environment
+        examples:
+            - name: staging
+              manifest: |-
+                {
+                  "color": "ff00ff",
+                  "key": "staging",
+                  "name": "Staging",
+                  "project_key": "${launchdarkly_project.example.key}",
+                  "tags": [
+                    "terraform",
+                    "staging"
+                  ]
+                }
+              references:
+                project_key: launchdarkly_project.example.key
+            - name: approvals_example
+              manifest: |-
+                {
+                  "approval_settings": [
+                    {
+                      "can_apply_declined_changes": true,
+                      "can_review_own_request": true,
+                      "min_num_approvals": 2,
+                      "required": true
+                    }
+                  ],
+                  "color": "ff00ff",
+                  "key": "approvals-example",
+                  "name": "Approvals Example Environment",
+                  "project_key": "${launchdarkly_project.example.key}",
+                  "tags": [
+                    "terraform",
+                    "staging"
+                  ]
+                }
+              references:
+                project_key: launchdarkly_project.example.key
+        argumentDocs:
+            api_key: '- The environment''s SDK key.'
+            approval_settings: '- (Optional) A nested block describing the environment approval settings. To learn more about this feature, read Approvals. To learn more about configuring them in Terraform, read Nested Approval Settings Blocks.'
+            approval_settings.can_apply_declined_changes: '- Set to true if changes can be applied as long as the min_num_approvals is met, regardless of whether any reviewers have declined a request. Defaults to true.'
+            approval_settings.can_review_own_request: '- Set to true if requesters can approve or decline their own request. They may always comment. Defaults to false.'
+            approval_settings.min_num_approvals: '- The number of approvals required before an approval request can be applied. This number must be between 1 and 5. Defaults to 1.'
+            approval_settings.required: '- Set to true for changes to flags in this environment to require approval. You may only set required to true if required_approval_tags is not set and vice versa. Defaults to false.'
+            approval_settings.required_approval_tags: '- An array of tags used to specify which flags with those tags require approval. You may only set required_approval_tags if required is not set to true and vice versa.'
+            client_side_id: '- The environment''s client-side ID.'
+            color: '- (Required) The color swatch as an RGB hex value with no leading #. For example: 000000.'
+            confirm_changes: '- (Optional) Set to true if this environment requires confirmation for flag and segment changes. This field will default to false when not set.'
+            default_track_events: '- (Optional) Set to true to enable data export for every flag created in this environment after you configure this argument. This field will default to false when not set. To learn more, read Data Export.'
+            default_ttl: '- (Optional) The TTL for the environment. This must be between 0 and 60 minutes. The TTL setting only applies to environments using the PHP SDK. This field will default to 0 when not set. To learn more, read TTL settings.'
+            id: '- The unique environment ID in the format project_key/environment_key.'
+            key: '- (Required) The project-unique key for the environment. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            mobile_key: '- The environment''s mobile key.'
+            name: '- (Required) The name of the environment.'
+            project_key: '- (Required) - The environment''s project key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            require_comments: '- (Optional) Set to true if this environment requires comments for flag and segment changes. This field will default to false when not set.'
+            secure_mode: '- (Optional) Set to true to ensure a user of the client-side SDK cannot impersonate another user. This field will default to false when not set.'
+            tags: '- (Optional) Set of tags associated with the environment.'
+        importStatements: []
+    launchdarkly_feature_flag:
+        subCategory: ""
+        description: Create and manage LaunchDarkly feature flags.
+        name: launchdarkly_feature_flag
+        title: launchdarkly_feature_flag
+        examples:
+            - name: building_materials
+              manifest: |-
+                {
+                  "client_side_availability": [
+                    {
+                      "using_environment_id": false,
+                      "using_mobile_key": true
+                    }
+                  ],
+                  "defaults": [
+                    {
+                      "off_variation": 0,
+                      "on_variation": 2
+                    }
+                  ],
+                  "description": "this is a multivariate flag with string variations.",
+                  "key": "building-materials",
+                  "name": "Building materials",
+                  "project_key": "${launchdarkly_project.example.key}",
+                  "tags": [
+                    "example",
+                    "terraform",
+                    "multivariate",
+                    "building-materials"
+                  ],
+                  "variation_type": "string",
+                  "variations": [
+                    {
+                      "description": "Watch out for wind.",
+                      "name": "Straw",
+                      "value": "straw"
+                    },
+                    {
+                      "description": "Sturdier than straw",
+                      "name": "Sticks",
+                      "value": "sticks"
+                    },
+                    {
+                      "description": "The strongest variation",
+                      "name": "Bricks",
+                      "value": "bricks"
+                    }
+                  ]
+                }
+              references:
+                project_key: launchdarkly_project.example.key
+            - name: json_example
+              manifest: |-
+                {
+                  "defaults": [
+                    {
+                      "off_variation": 0,
+                      "on_variation": 1
+                    }
+                  ],
+                  "key": "json-example",
+                  "name": "JSON example flag",
+                  "project_key": "example-project",
+                  "variation_type": "json",
+                  "variations": [
+                    {
+                      "name": "Single foo",
+                      "value": "${jsonencode({ \"foo\" : \"bar\" })}"
+                    },
+                    {
+                      "name": "Multiple foos",
+                      "value": "${jsonencode({ \"foos\" : [\"bar1\", \"bar2\"] })}"
+                    }
+                  ]
+                }
+        argumentDocs:
+            archived: '- (Optional) Specifies whether the flag is archived or not. Note that you cannot create a new flag that is archived, but can update a flag to be archived.'
+            client_side_availability: '- (Optional) A block describing whether this flag should be made available to the client-side JavaScript SDK using the client-side Id, mobile key, or both. This value gets its default from your project configuration if not set. Once set, if removed, it will retain its last set value. To learn more, read Nested Client-Side Availability Block.'
+            client_side_availability.using_environment_id: '- (Optional) Whether this flag is available to SDKs using the client-side ID.'
+            client_side_availability.using_mobile_key: '- (Optional) Whether this flag is available to SDKs using a mobile key.'
+            custom_properties: '- (Optional) List of nested blocks describing the feature flag''s custom properties. To learn more, read Nested Custom Properties.'
+            defaults: '- (Optional) A block containing the indices of the variations to be used as the default on and off variations in all new environments. Flag configurations in existing environments will not be changed nor updated if the configuration block is removed. To learn more, read Nested Defaults Blocks.'
+            defaults.off_variation: '- (Required) The index of the variation the flag will default to in all new environments when off.'
+            defaults.on_variation: '- (Required) The index of the variation the flag will default to in all new environments when on.'
+            description: '- (Optional) The feature flag''s description.'
+            id: '- The unique feature flag ID in the format project_key/flag_key.'
+            include_in_snippet: '- Deprecated (Optional) Specifies whether this flag should be made available to the client-side JavaScript SDK using the client-side Id. This value gets its default from your project configuration if not set. include_in_snippet is now deprecated. Please migrate to client_side_availability.using_environment_id to maintain future compatability.'
+            key: '- (Required) The unique feature flag key that references the flag in your application code. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            maintainer_id: '- (Optional) The feature flag maintainer''s 24 character alphanumeric team member ID. If not set, it will automatically be or stay set to the member ID associated with the API key used by your LaunchDarkly Terraform provider or the most recently-set maintainer.'
+            name: '- (Required) The human-readable name of the feature flag.'
+            project_key: '- (Required) The feature flag''s project key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            tags: '- (Optional) Set of feature flag tags.'
+            temporary: '- (Optional) Specifies whether the flag is a temporary flag.'
+            value: '- (Required) The list of custom property value strings.'
+            variation_type: '- (Required) The feature flag''s variation type: boolean, string, number or json.'
+            variations: '- (Required) List of nested blocks describing the variations associated with the feature flag. You must specify at least two variations. To learn more, read Nested Variations Blocks.'
+            variations.value: '- (Required) The variation value. The value''s type must correspond to the variation_type argument. For example: variation_type = "boolean" accepts only true or false. The "number" variation type accepts both floats and ints, but please note that any trailing zeroes on floats will be trimmed (i.e. 1.1 and 1.100 will both be converted to 1.1).'
+        importStatements: []
+    launchdarkly_feature_flag_environment:
+        subCategory: ""
+        description: Create and manage LaunchDarkly environment-specific feature flag attributes.
+        name: launchdarkly_feature_flag_environment
+        title: launchdarkly_feature_flag_environment
+        examples:
+            - name: number_env
+              manifest: |-
+                {
+                  "context_targets": [
+                    {
+                      "context_kind": "account",
+                      "values": [
+                        "accountX"
+                      ],
+                      "variation": 1
+                    }
+                  ],
+                  "env_key": "${launchdarkly_environment.staging.key}",
+                  "fallthrough": [
+                    {
+                      "bucket_by": "accountId",
+                      "context_kind": "account",
+                      "rollout_weights": [
+                        60000,
+                        40000,
+                        0
+                      ]
+                    }
+                  ],
+                  "flag_id": "${launchdarkly_feature_flag.number.id}",
+                  "off_variation": 2,
+                  "on": true,
+                  "prerequisites": [
+                    {
+                      "flag_key": "${launchdarkly_feature_flag.basic.key}",
+                      "variation": 0
+                    }
+                  ],
+                  "rules": [
+                    {
+                      "clauses": [
+                        {
+                          "attribute": "country",
+                          "negate": false,
+                          "op": "startsWith",
+                          "values": [
+                            "aus",
+                            "de",
+                            "united"
+                          ]
+                        },
+                        {
+                          "attribute": "segmentMatch",
+                          "negate": false,
+                          "op": "segmentMatch",
+                          "values": [
+                            "${launchdarkly_segment.example.key}"
+                          ]
+                        }
+                      ],
+                      "description": "example targeting rule with two clauses",
+                      "variation": 0
+                    }
+                  ],
+                  "targets": [
+                    {
+                      "values": [
+                        "user0"
+                      ],
+                      "variation": 0
+                    },
+                    {
+                      "values": [
+                        "user1",
+                        "user2"
+                      ],
+                      "variation": 1
+                    }
+                  ]
+                }
+              references:
+                env_key: launchdarkly_environment.staging.key
+                flag_id: launchdarkly_feature_flag.number.id
+                prerequisites.flag_key: launchdarkly_feature_flag.basic.key
+        argumentDocs:
+            clauses.attribute: '- (Required) The user attribute to operate on.'
+            clauses.context_kind: '- (Optional) The context kind associated with this rule clause. This argument is only valid if rollout_weights is also specified. If omitted, defaults to "user".'
+            clauses.negate: '- (Required) Whether to negate the rule clause.'
+            clauses.op: '- (Required) The operator associated with the rule clause. Available options are in, endsWith, startsWith, matches, contains, lessThan, lessThanOrEqual, greaterThanOrEqual, before, after, segmentMatch, semVerEqual, semVerLessThan, and semVerGreaterThan.'
+            clauses.value_type: '- (Optional) The type for each of the clause''s values. Available types are boolean, string, and number. If omitted, value_type defaults to string.'
+            clauses.values: '- (Required) The list of values associated with the rule clause.'
+            context_targets: '- (Optional) Set of nested blocks describing the individual targets for non-user context kinds for each variation. To learn more, read Nested Targets / Context Targets Blocks.'
+            env_key: '- (Required) The environment key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            fallthrough: (previously flag_fallthrough) - (Required) Nested block describing the default variation to serve if no prerequisites, target, or rules apply.To learn more, read Nested Fallthrough Block.
+            fallthrough.bucket_by: '- (Optional) Group percentage rollout by a custom attribute. This argument is only valid if rollout_weights is also specified.'
+            fallthrough.context_kind: '- (Optional) The context kind associated with the specified rollout. This argument is only valid if rollout_weights is also specified. If omitted, defaults to "user".'
+            fallthrough.rollout_weights: '- (Optional) List of integer percentage rollout weights (in thousandths of a percent) to apply to each variation if no prerequisites, target, or rules apply. The sum of the rollout_weights must equal 100000 and the number of rollout weights specified in the array must match the number of flag variations. You must specify either variation or rollout_weights.'
+            fallthrough.variation: '- (Optional) The default integer variation index to serve if no prerequisites, target, or rules apply. You must specify either variation or rollout_weights.'
+            flag_id: '- (Required) The feature flag''s unique id in the format project_key/flag_key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            id: '- The unique feature flag environment ID in the format project_key/env_key/flag_key.'
+            off_variation: '- (Required) The index of the variation to serve if targeting is disabled.'
+            "on": (previously targeting_enabled) - (Optional) Whether targeting is enabled. Defaults to false if not set.
+            prerequisites: '- (Optional) List of nested blocks describing prerequisite feature flags rules. To learn more, read Nested Prequisites Blocks.'
+            prerequisites.flag_key: '- (Required) The prerequisite feature flag''s key.'
+            prerequisites.variation: '- (Required) The index of the prerequisite feature flag''s variation to target.'
+            rules: '- (Optional) List of logical targeting rules. To learn more, read Nested Rules Blocks.'
+            rules.bucket_by: '- (Optional) Group percentage rollout by a custom attribute. This argument is only valid if rollout_weights is also specified.'
+            rules.clauses: '- (Required) List of nested blocks specifying the logical clauses to evaluate. To learn more, read Nested Clauses Blocks.'
+            rules.description: '- (Optional) A human-readable description of the targeting rule.'
+            rules.rollout_weights: '- (Optional) List of integer percentage rollout weights (in thousandths of a percent) to apply to each variation if the rule clauses evaluates to true. The sum of the rollout_weights must equal 100000 and the number of rollout weights specified in the array must match the number of flag variations. You must specify either variation or rollout_weights.'
+            rules.variation: '- (Optional) The integer variation index to serve if the rule clauses evaluate to true. You must specify either variation or rollout_weights.'
+            targets: (previously user_targets) - (Optional) Set of nested blocks describing the individual user targets for each variation. To learn more, read Nested Targets / Context Targets Blocks.
+            targets.context_targets: only] context_kind - (Required) The context kind on which the flag should target in this environment. User ("user") targets should be specified as targets attribute blocks.
+            targets.values: '- (Required) List of user strings to target.'
+            targets.variation: '- (Required) The index of the variation to serve is a user target value is matched.'
+            track_events: '- (Optional) Whether to send event data back to LaunchDarkly. Defaults to false if not set.'
+        importStatements: []
+    launchdarkly_flag_trigger:
+        subCategory: ""
+        description: Create and manage LaunchDarkly flag triggers.
+        name: launchdarkly_flag_trigger
+        title: launchdarkly_flag_trigger
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "enabled": false,
+                  "env_key": "test",
+                  "flag_key": "${launchdarkly_feature_flag.trigger_flag.key}",
+                  "instructions": [
+                    {
+                      "kind": "turnFlagOn"
+                    }
+                  ],
+                  "integration_key": "generic-trigger",
+                  "project_key": "${launchdarkly_project.example.key}"
+                }
+              references:
+                flag_key: launchdarkly_feature_flag.trigger_flag.key
+                project_key: launchdarkly_project.example.key
+        argumentDocs:
+            enabled: '- (Optional) Whether the trigger is currently active or not. This property defaults to true upon creation and will thereafter conform to the last Terraform-configured value.'
+            env_key: '- (Required) The unique key of the environment the flag trigger will work in. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            flag_key: '- (Required) The unique key of the associated flag. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            instructions: '- (Required) Instructions containing the action to perform when invoking the trigger. Currently supported flag actions are "turnFlagOn" and "turnFlagOff". This must be passed as the key-value pair { kind = "<flag_action>" }.'
+            integration_key: '- (Required) The unique identifier of the integration you intend to set your trigger up with. Currently supported are "datadog", "dynatrace", "honeycomb", "new-relic-apm", "signalfx", and "generic-trigger". "generic-trigger" should be used for integrations not explicitly supported. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            project_key: '- (Required) The unique key of the project encompassing the associated flag. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+        importStatements: []
+    launchdarkly_metric:
+        subCategory: ""
+        description: Create and manage LaunchDarkly metrics.
+        name: launchdarkly_metric
+        title: launchdarkly_metric
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "Metric description.",
+                  "key": "example-metric",
+                  "kind": "pageview",
+                  "name": "Example Metric",
+                  "project_key": "${launchdarkly_project.example.key}",
+                  "tags": [
+                    "example"
+                  ],
+                  "urls": [
+                    {
+                      "kind": "substring",
+                      "substring": "foo"
+                    }
+                  ]
+                }
+              references:
+                project_key: launchdarkly_project.example.key
+        argumentDocs:
+            creation_date: '- The metric''s creation date represented as a UNIX epoch timestamp.'
+            description: '- (Optional) The description of the metric''s purpose.'
+            event_key: '- (Required for kind custom) The event key to watch for custom metrics.'
+            id: '- The unique environment ID in the format project_key/metric_key.'
+            is_active: '- (Optional) Whether a metric is a active.'
+            is_numeric: '- (Optional) Whether a custom metric is a numeric metric or not.'
+            key: '- (Required) The unique key that references the metric. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            kind: '- (Required) The metric type. Available choices are click, custom, and pageview. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            maintainer_id: '- (Optional) The userId of the user maintaining the metric.'
+            name: '- (Required) The human-friendly name for the metric.'
+            project_key: '- (Required) The metrics''s project key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            randomization_units: '- (Optional) A set of one or more context kinds that this metric can measure events from. Metrics can only use context kinds marked as "Available for experiments." For more information, read Allocating experiment audiences'
+            selector: '- (Required for kind click) The CSS selector for click metrics.'
+            success_criteria: '- (Required for kind custom) The success criteria for numeric custom metrics.'
+            tags: '- (Optional) Set of tags for the metric.'
+            unit: '- (Required for kind custom) The unit for numeric custom metrics.'
+            urls: '- (Required for kind click and pageview) A block determining which URLs the metric watches. To learn more, read Nested Urls Blocks.'
+            urls.kind: '- (Required) The URL type. Available choices are exact, canonical, substring and regex.'
+            urls.pattern: '- (Required for kind regex) The regex pattern to match by.'
+            urls.substring: '- (Required for kind substring) The URL substring to match by.'
+            urls.url: '- (Required for kind exact and canonical) The exact or canonical URL.'
+        importStatements: []
+    launchdarkly_project:
+        subCategory: ""
+        description: Create and manage LaunchDarkly projects.
+        name: launchdarkly_project
+        title: launchdarkly_project
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "environments": [
+                    {
+                      "approval_settings": [
+                        {
+                          "can_apply_declined_changes": false,
+                          "can_review_own_request": false,
+                          "min_num_approvals": 3,
+                          "required_approval_tags": [
+                            "approvals_required"
+                          ]
+                        }
+                      ],
+                      "color": "EEEEEE",
+                      "key": "production",
+                      "name": "Production",
+                      "tags": [
+                        "terraform"
+                      ]
+                    },
+                    {
+                      "color": "000000",
+                      "key": "staging",
+                      "name": "Staging",
+                      "tags": [
+                        "terraform"
+                      ]
+                    }
+                  ],
+                  "key": "example-project",
+                  "name": "Example project",
+                  "tags": [
+                    "terraform"
+                  ]
+                }
+        argumentDocs:
+            approval_settings.can_apply_declined_changes: '- Set to true if changes can be applied as long as the min_num_approvals is met, regardless of whether any reviewers have declined a request. Defaults to true.'
+            approval_settings.can_review_own_request: '- Set to true if requesters can approve or decline their own request. They may always comment. Defaults to false.'
+            approval_settings.min_num_approvals: '- The number of approvals required before an approval request can be applied. This number must be between 1 and 5. Defaults to 1.'
+            approval_settings.required: '- Set to true for changes to flags in this environment to require approval. You may only set required to true if required_approval_tags is not set and vice versa. Defaults to false.'
+            approval_settings.required_approval_tags: '- An array of tags used to specify which flags with those tags require approval. You may only set required_approval_tags if required is not set to true and vice versa.'
+            default_client_side_availability.using_environment_id: '- (Required) Whether feature flags created under the project are available to JavaScript SDKs using the client-side ID by default. Defaults to false when not using default_client_side_availability.'
+            default_client_side_availability.using_mobile_key: '- (Required) Whether feature flags created under the project are available to mobile SDKs, and other non-JavaScript SDKs, using a mobile key by default. Defaults to true when not using default_client_side_availability.'
+            environments: '- (Required) List of nested environments blocks describing LaunchDarkly environments that belong to the project. When managing LaunchDarkly projects in Terraform, you should always manage your environments as nested project resources. To learn more, read Nested Environments Blocks.'
+            environments.approval_settings: '- (Optional) A nested block describing the environment approval settings. To learn more about this feature, read Approvals. To learn more about configuring them in Terraform, read Nested Environments Approval Settings Blocks.'
+            environments.color: '- (Required) The color swatch as an RGB hex value with no leading #. For example: 000000.'
+            environments.confirm_changes: '- (Optional) Set to true if this environment requires confirmation for flag and segment changes. This field will default to false when not set.'
+            environments.default_client_side_availability: '- (Optional) A block describing which client-side SDKs can use new flags by default. To learn more, read Nested Client Side Availability Block.'
+            environments.default_track_events: '- (Optional) Set to true to enable data export for every flag created in this environment after you configure this argument. This field will default to false when not set. To learn more, read Data Export.'
+            environments.default_ttl: '- (Optional) The TTL for the environment. This must be between 0 and 60 minutes. The TTL setting only applies to environments using the PHP SDK. This field will default to 0 when not set. To learn more, read TTL settings.'
+            environments.include_in_snippet: '- Deprecated (Optional) Whether feature flags created under the project should be available to client-side SDKs by default. Please migrate to default_client_side_availability to maintain future compatibility.'
+            environments.key: '- (Required) The project-unique key for the environment. A change in this field will force the destruction of the existing environment and the creation of a new one.'
+            environments.name: '- (Required) The name of the environment.'
+            environments.require_comments: '- (Optional) Set to true if this environment requires comments for flag and segment changes. This field will default to false when not set.'
+            environments.secure_mode: '- (Optional) Set to true to ensure a user of the client-side SDK cannot impersonate another user. This field will default to false when not set.'
+            environments.tags: '- (Optional) The project''s set of tags.'
+            key: '- (Required) The project''s unique key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            name: '- (Required) The project''s name.'
+        importStatements: []
+    launchdarkly_relay_proxy_configuration:
+        subCategory: ""
+        description: '"Create and manage Relay Proxy configurations"'
+        name: launchdarkly_relay_proxy_configuration
+        title: ""
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "name": "example-config",
+                  "policy": [
+                    {
+                      "actions": [
+                        "*"
+                      ],
+                      "effect": "allow",
+                      "resources": [
+                        "proj/*:env/*"
+                      ]
+                    }
+                  ]
+                }
+        argumentDocs:
+            display_key: '- The last 4 characters of the Relay Proxy configuration''s unique key.'
+            full_key: '- The Relay Proxy configuration''s unique key. Because the full_key is only exposed upon creation, it will not be available if the resource is imported.'
+            id: '- The Relay Proxy configuration''s ID'
+            name: '- (Required) The human-readable name for your Relay Proxy configuration.'
+            policy: '- (Required) The Relay Proxy configuration''s rule policy block. This determines what content the Relay Proxy receives. To learn more, read Understanding policies.'
+            policy.actions: '- (Optional) The list of action specifiers defining the actions to which the rule policy applies. Either actions or not_actions must be specified. For a list of available actions read Actions reference.'
+            policy.effect: '- (Required) - Either allow or deny. This argument defines whether the rule policy allows or denies access to the named resources and actions.'
+            policy.not_actions: '- (Optional) The list of action specifiers defining the actions to which the rule policy does not apply. Either actions or not_actions must be specified. For a list of available actions read Actions reference.'
+            policy.not_resources: '- (Optional) - The list of resource specifiers defining the resources to which the rule policy does not apply. Either resources or not_resources must be specified. For a list of available resources read Understanding resource types and scopes.'
+            policy.resources: '- (Optional) - The list of resource specifiers defining the resources to which the rule policy applies. Either resources or not_resources must be specified. For a list of available resources read Understanding resource types and scopes.'
+        importStatements: []
+    launchdarkly_segment:
+        subCategory: ""
+        description: Create and manage LaunchDarkly segments.
+        name: launchdarkly_segment
+        title: launchdarkly_segment
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "description": "This segment is managed by Terraform",
+                  "env_key": "${launchdarkly_environment.example.key}",
+                  "excluded": [
+                    "user3",
+                    "user4"
+                  ],
+                  "included": [
+                    "user1",
+                    "user2"
+                  ],
+                  "included_contexts": [
+                    {
+                      "context_kind": "account",
+                      "values": [
+                        "account1",
+                        "account2"
+                      ]
+                    }
+                  ],
+                  "key": "example-segment-key",
+                  "name": "example segment",
+                  "project_key": "${launchdarkly_project.example.key}",
+                  "rules": [
+                    {
+                      "clauses": [
+                        {
+                          "attribute": "country",
+                          "context_kind": "location-data",
+                          "negate": false,
+                          "op": "startsWith",
+                          "values": [
+                            "en",
+                            "de",
+                            "un"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "tags": [
+                    "segment-tag-1",
+                    "segment-tag-2"
+                  ]
+                }
+              references:
+                env_key: launchdarkly_environment.example.key
+                project_key: launchdarkly_project.example.key
+        argumentDocs:
+            clauses.attribute: '- (Required) The user attribute to operate on.'
+            clauses.negate: '- (Required) Whether to negate the rule clause.'
+            clauses.op: '- (Required) The operator associated with the rule clause. Available options are in, endsWith, startsWith, matches, contains, lessThan, lessThanOrEqual, greaterThanOrEqual, before, after, segmentMatch, semVerEqual, semVerLessThan, and semVerGreaterThan.'
+            clauses.value_type: '- (Optional) The type for each of the clause''s values. Available types are boolean, string, and number. If omitted, value_type defaults to string.'
+            clauses.values: '- (Required) The list of values associated with the rule clause.'
+            creation_date: '- The segment''s creation date represented as a UNIX epoch timestamp.'
+            description: '- (Optional) The description of the segment''s purpose.'
+            env_key: '- (Required) The segment''s environment key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            excluded: '- (Optional) List of user keys excluded from the segment.'
+            excluded_contexts: '- (Optional) Non-user target objects excluded from the segment. To learn more, read Nested Context Target Blocks.'
+            id: '- The unique environment ID in the format project_key/env_key/segment_key.'
+            included: '- (Optional) List of user keys included in the segment.'
+            included_contexts: '- (Optional) Non-user target objects included in the segment. To learn more, read Nested Context Target Blocks.'
+            included_contexts.context_kind: '- (Required) The context kind associated with this segment target. To target on user contexts, use the included and excluded attributes instead.'
+            included_contexts.values: '- (Required) List of target object keys included in or excluded from the segment.'
+            key: '- (Required) The unique key that references the segment. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            name: '- (Required) The human-friendly name for the segment.'
+            project_key: '- (Required) The segment''s project key. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            rules: '- (Optional) List of nested custom rule blocks to apply to the segment. To learn more, read Nested Rules Blocks.'
+            rules.bucket_by: '- (Optional) The attribute by which to group users together.'
+            rules.clauses: '- (Optional) List of nested custom rule clause blocks. To learn more, read Nested Clauses Blocks.'
+            rules.rollout_context_kind: '- (Optional) The context kind associated with the segment rule. This argument is only valid if weight is also specified. If omitted, defaults to "user".'
+            rules.weight: '- (Optional) The integer weight of the rule (between 1 and 100000).'
+            tags: '- (Optional) Set of tags for the segment.'
+        importStatements: []
+    launchdarkly_team:
+        subCategory: ""
+        description: Create and manage a LaunchDarkly team.
+        name: launchdarkly_team
+        title: launchdarkly_team
+        examples:
+            - name: platform_team
+              manifest: |-
+                {
+                  "custom_role_keys": [
+                    "platform",
+                    "nomad-administrators"
+                  ],
+                  "description": "Team to manage internal infrastructure",
+                  "key": "platform_team",
+                  "maintainers": [
+                    "12ab3c45de678910abc12345"
+                  ],
+                  "member_ids": [
+                    "507f1f77bcf86cd799439011",
+                    "569f183514f4432160000007"
+                  ],
+                  "name": "Platform team"
+                }
+        argumentDocs:
+            custom_role_keys: '- (Optional) List of custom role keys the team will access. The referenced custom roles must already exist in LaunchDarkly. If they don''t, the provider may behave unexpectedly.'
+            description: '- (Optional) The team description.'
+            key: '- (Required) The team key.'
+            maintainers: '- (Optional) List of member IDs for users who maintain the team.'
+            member_ids: '- (Optional) List of member IDs who belong to the team.'
+            name: '- (Required) A human-friendly name for the team.'
+        importStatements: []
+    launchdarkly_team_member:
+        subCategory: ""
+        description: Create and manage LaunchDarkly team members.
+        name: launchdarkly_team_member
+        title: launchdarkly_team_member
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "email": "example.user@example.com",
+                  "first_name": "John",
+                  "last_name": "Smith",
+                  "role": "writer"
+                }
+        argumentDocs:
+            custom_roles: '- (Optional) The list of custom roles keys associated with the team member. Custom roles are only available to customers on enterprise plans. To learn more about enterprise plans, contact sales@launchdarkly.com.'
+            email: '- (Required) The unique email address associated with the team member. A change in this field will force the destruction of the existing resource and the creation of a new one.'
+            first_name: '- (Optional) The team member''s given name. Please note that, once created, this cannot be updated except by the team member themself.'
+            id: '- The 24 character alphanumeric ID of the team member.'
+            last_name: '- (Optional) The team member''s family name. Please note that, once created, this cannot be updated except by the team member themself.'
+            role: '- (Optional) The role associated with team member. Supported roles are reader, writer, no_access, or admin. If you don''t specify a role, reader is assigned by default.'
+        importStatements: []
+    launchdarkly_webhook:
+        subCategory: ""
+        description: Create and manage LaunchDarkly webhooks.
+        name: launchdarkly_webhook
+        title: launchdarkly_webhook
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "name": "Example Webhook",
+                  "on": true,
+                  "statements": [
+                    {
+                      "actions": [
+                        "*"
+                      ],
+                      "effect": "allow",
+                      "resources": [
+                        "proj/*:env/production:flag/*"
+                      ]
+                    },
+                    {
+                      "actions": [
+                        "*"
+                      ],
+                      "effect": "allow",
+                      "resources": "${resources}"
+                    }
+                  ],
+                  "tags": [
+                    "terraform"
+                  ],
+                  "url": "http://webhooks.com/webhook"
+                }
+              references:
+                statements.resources: resources
+        argumentDocs:
+            id: '- The unique webhook ID.'
+            name: '- (Optional) The webhook''s human-readable name.'
+            "on": '- (Required, previously enabled) Specifies whether the webhook is enabled.'
+            secret: '- (Optional) The secret used to sign the webhook.'
+            statements.actions: '- (Optional) The list of action specifiers defining the actions to which the statement applies. Either actions or not_actions must be specified. For a list of available actions read Actions reference.'
+            statements.effect: '- (Required) Either allow or deny. This argument defines whether the statement allows or denies access to the named resources and actions.'
+            statements.not_actions: '- (Optional) The list of action specifiers defining the actions to which the statement does not apply. Either actions or not_actions must be specified. For a list of available actions read Actions reference.'
+            statements.not_resources: '- (Optional) The list of resource specifiers defining the resources to which the statement does not apply. Either resources or not_resources must be specified. For a list of available resources read Understanding resource types and scopes.'
+            statements.resources: '- (Optional) The list of resource specifiers defining the resources to which the statement applies. Either resources or not_resources must be specified. For a list of available resources read Understanding resource types and scopes.'
+            tags: '- (Optional) Set of tags associated with the webhook.'
+            url: '- (Required) The URL of the remote webhook.'
         importStatements: []

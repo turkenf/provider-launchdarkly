@@ -1,0 +1,621 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.3
+  creationTimestamp: null
+  name: flags.flag.launchdarkly.upbound.io
+spec:
+  group: flag.launchdarkly.upbound.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - launchdarkly
+    kind: Flag
+    listKind: FlagList
+    plural: flags
+    singular: flag
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Flag is the Schema for the Flags API. Create and manage LaunchDarkly
+          feature flags.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FlagSpec defines the desired state of Flag
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: 'DeletionPolicy specifies what will happen to the underlying
+                  external when this managed resource is deleted - either "Delete"
+                  or "Orphan" the external resource. This field is planned to be deprecated
+                  in favor of the ManagementPolicy field in a future release. Currently,
+                  both could be set independently and non-default values would be
+                  honored if the feature flag is enabled. See the design doc for more
+                  information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223'
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                properties:
+                  archived:
+                    description: Specifies whether the flag is archived or not. Note
+                      that you cannot create a new flag that is archived, but can
+                      update a flag to be archived. Whether to archive the flag
+                    type: boolean
+                  clientSideAvailability:
+                    description: A block describing whether this flag should be made
+                      available to the client-side JavaScript SDK using the client-side
+                      Id, mobile key, or both. This value gets its default from your
+                      project configuration if not set. Once set, if removed, it will
+                      retain its last set value. To learn more, read Nested Client-Side
+                      Availability Block.
+                    items:
+                      properties:
+                        usingEnvironmentId:
+                          description: Whether this flag is available to SDKs using
+                            the client-side ID.
+                          type: boolean
+                        usingMobileKey:
+                          description: Whether this flag is available to SDKs using
+                            a mobile key.
+                          type: boolean
+                      type: object
+                    type: array
+                  customProperties:
+                    description: List of nested blocks describing the feature flag's
+                      custom properties. To learn more, read Nested Custom Properties.
+                    items:
+                      properties:
+                        key:
+                          description: The unique feature flag key that references
+                            the flag in your application code. A change in this field
+                            will force the destruction of the existing resource and
+                            the creation of a new one.
+                          type: string
+                        name:
+                          description: The human-readable name of the feature flag.
+                          type: string
+                        value:
+                          description: 'The variation value. The value''s type must
+                            correspond to the variation_type argument. For example:
+                            variation_type = "boolean" accepts only true or false.
+                            The "number" variation type accepts both floats and ints,
+                            but please note that any trailing zeroes on floats will
+                            be trimmed (i.e. 1.1 and 1.100 will both be converted
+                            to 1.1).'
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - name
+                      - value
+                      type: object
+                    type: array
+                  defaults:
+                    description: A block containing the indices of the variations
+                      to be used as the default on and off variations in all new environments.
+                      Flag configurations in existing environments will not be changed
+                      nor updated if the configuration block is removed. To learn
+                      more, read Nested Defaults Blocks. The default variations used
+                      for this flag in new environments. If omitted, the first and
+                      last variation will be used
+                    items:
+                      properties:
+                        offVariation:
+                          description: The index of the variation the flag will default
+                            to in all new environments when off. The index of the
+                            variation served when the flag is off for new environments
+                          type: number
+                        onVariation:
+                          description: The index of the variation the flag will default
+                            to in all new environments when on. The index of the variation
+                            served when the flag is on for new environments
+                          type: number
+                      required:
+                      - offVariation
+                      - onVariation
+                      type: object
+                    type: array
+                  description:
+                    description: The feature flag's description. A short description
+                      of what the flag will be used for
+                    type: string
+                  includeInSnippet:
+                    description: Deprecated  Specifies whether this flag should be
+                      made available to the client-side JavaScript SDK using the client-side
+                      Id. This value gets its default from your project configuration
+                      if not set. include_in_snippet is now deprecated. Please migrate
+                      to client_side_availability.using_environment_id to maintain
+                      future compatability. Whether or not this flag should be made
+                      available to the client-side JavaScript SDK
+                    type: boolean
+                  key:
+                    description: The unique feature flag key that references the flag
+                      in your application code. A change in this field will force
+                      the destruction of the existing resource and the creation of
+                      a new one. A unique key that will be used to reference the flag
+                      in your code
+                    type: string
+                  maintainerId:
+                    description: The feature flag maintainer's 24 character alphanumeric
+                      team member ID. The LaunchDarkly id of the user who will maintain
+                      the flag
+                    type: string
+                  name:
+                    description: The human-readable name of the feature flag. A human-friendly
+                      name for the feature flag
+                    type: string
+                  projectKey:
+                    description: The feature flag's project key. A change in this
+                      field will force the destruction of the existing resource and
+                      the creation of a new one. The LaunchDarkly project key
+                    type: string
+                  tags:
+                    description: Set of feature flag tags. Tags associated with your
+                      resource
+                    items:
+                      type: string
+                    type: array
+                  temporary:
+                    description: Specifies whether the flag is a temporary flag. Whether
+                      or not the flag is a temporary flag
+                    type: boolean
+                  variationType:
+                    description: 'The feature flag''s variation type: boolean, string,
+                      number or json. The uniform type for all variations. Can be
+                      either "boolean", "string", "number", or "json".'
+                    type: string
+                  variations:
+                    description: List of nested blocks describing the variations associated
+                      with the feature flag. You must specify at least two variations.
+                      To learn more, read Nested Variations Blocks. An array of possible
+                      variations for the flag
+                    items:
+                      properties:
+                        description:
+                          description: The feature flag's description. A description
+                            for the variation
+                          type: string
+                        name:
+                          description: The human-readable name of the feature flag.
+                            A name for the variation
+                          type: string
+                        value:
+                          description: 'The variation value. The value''s type must
+                            correspond to the variation_type argument. For example:
+                            variation_type = "boolean" accepts only true or false.
+                            The "number" variation type accepts both floats and ints,
+                            but please note that any trailing zeroes on floats will
+                            be trimmed (i.e. 1.1 and 1.100 will both be converted
+                            to 1.1). The value of the flag for this variation'
+                          type: string
+                      required:
+                      - value
+                      type: object
+                    type: array
+                type: object
+              managementPolicy:
+                default: FullControl
+                description: 'THIS IS AN ALPHA FIELD. Do not use it in production.
+                  It is not honored unless the relevant Crossplane feature flag is
+                  enabled, and may be changed or removed without notice. ManagementPolicy
+                  specifies the level of control Crossplane has over the managed external
+                  resource. This field is planned to replace the DeletionPolicy field
+                  in a future release. Currently, both could be set independently
+                  and non-default values would be honored if the feature flag is enabled.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223'
+                enum:
+                - FullControl
+                - ObserveOnly
+                - OrphanOnDelete
+                type: string
+              providerConfigRef:
+                default:
+                  name: default
+                description: ProviderConfigReference specifies how the provider that
+                  will be used to create, observe, update, and delete this managed
+                  resource should be configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: Resolution specifies whether resolution of this
+                          reference is required. The default is 'Required', which
+                          means the reconcile will fail if the reference cannot be
+                          resolved. 'Optional' means this reference will be a no-op
+                          if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: Resolve specifies when this reference should
+                          be resolved. The default is 'IfNotPresent', which will attempt
+                          to resolve the reference only when the corresponding field
+                          is not present. Use 'Always' to resolve the reference on
+                          every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              providerRef:
+                description: 'ProviderReference specifies the provider that will be
+                  used to create, observe, update, and delete this managed resource.
+                  Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: Resolution specifies whether resolution of this
+                          reference is required. The default is 'Required', which
+                          means the reconcile will fail if the reference cannot be
+                          resolved. 'Optional' means this reference will be a no-op
+                          if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: Resolve specifies when this reference should
+                          be resolved. The default is 'IfNotPresent', which will attempt
+                          to resolve the reference only when the corresponding field
+                          is not present. Use 'Always' to resolve the reference on
+                          every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              publishConnectionDetailsTo:
+                description: PublishConnectionDetailsTo specifies the connection secret
+                  config which contains a name, metadata and a reference to secret
+                  store config to which any connection details for this managed resource
+                  should be written. Connection details frequently include the endpoint,
+                  username, and password required to connect to the managed resource.
+                properties:
+                  configRef:
+                    default:
+                      name: default
+                    description: SecretStoreConfigRef specifies which secret store
+                      config should be used for this ConnectionSecret.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  metadata:
+                    description: Metadata is the metadata for connection secret.
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: Annotations are the annotations to be added to
+                          connection secret. - For Kubernetes secrets, this will be
+                          used as "metadata.annotations". - It is up to Secret Store
+                          implementation for others store types.
+                        type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: Labels are the labels/tags to be added to connection
+                          secret. - For Kubernetes secrets, this will be used as "metadata.labels".
+                          - It is up to Secret Store implementation for others store
+                          types.
+                        type: object
+                      type:
+                        description: Type is the SecretType for the connection secret.
+                          - Only valid for Kubernetes Secret Stores.
+                        type: string
+                    type: object
+                  name:
+                    description: Name is the name of the connection secret.
+                    type: string
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: WriteConnectionSecretToReference specifies the namespace
+                  and name of a Secret to which any connection details for this managed
+                  resource should be written. Connection details frequently include
+                  the endpoint, username, and password required to connect to the
+                  managed resource. This field is planned to be replaced in a future
+                  release in favor of PublishConnectionDetailsTo. Currently, both
+                  could be set independently and connection details would be published
+                  to both without affecting each other.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+            x-kubernetes-validations:
+            - message: key is a required parameter
+              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.key)
+            - message: name is a required parameter
+              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.name)
+            - message: projectKey is a required parameter
+              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.projectKey)
+            - message: variationType is a required parameter
+              rule: self.managementPolicy == 'ObserveOnly' || has(self.forProvider.variationType)
+          status:
+            description: FlagStatus defines the observed state of Flag.
+            properties:
+              atProvider:
+                properties:
+                  archived:
+                    description: Specifies whether the flag is archived or not. Note
+                      that you cannot create a new flag that is archived, but can
+                      update a flag to be archived. Whether to archive the flag
+                    type: boolean
+                  clientSideAvailability:
+                    description: A block describing whether this flag should be made
+                      available to the client-side JavaScript SDK using the client-side
+                      Id, mobile key, or both. This value gets its default from your
+                      project configuration if not set. Once set, if removed, it will
+                      retain its last set value. To learn more, read Nested Client-Side
+                      Availability Block.
+                    items:
+                      properties:
+                        usingEnvironmentId:
+                          description: Whether this flag is available to SDKs using
+                            the client-side ID.
+                          type: boolean
+                        usingMobileKey:
+                          description: Whether this flag is available to SDKs using
+                            a mobile key.
+                          type: boolean
+                      type: object
+                    type: array
+                  customProperties:
+                    description: List of nested blocks describing the feature flag's
+                      custom properties. To learn more, read Nested Custom Properties.
+                    items:
+                      properties:
+                        key:
+                          description: The unique feature flag key that references
+                            the flag in your application code. A change in this field
+                            will force the destruction of the existing resource and
+                            the creation of a new one.
+                          type: string
+                        name:
+                          description: The human-readable name of the feature flag.
+                          type: string
+                        value:
+                          description: 'The variation value. The value''s type must
+                            correspond to the variation_type argument. For example:
+                            variation_type = "boolean" accepts only true or false.
+                            The "number" variation type accepts both floats and ints,
+                            but please note that any trailing zeroes on floats will
+                            be trimmed (i.e. 1.1 and 1.100 will both be converted
+                            to 1.1).'
+                          items:
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                  defaults:
+                    description: A block containing the indices of the variations
+                      to be used as the default on and off variations in all new environments.
+                      Flag configurations in existing environments will not be changed
+                      nor updated if the configuration block is removed. To learn
+                      more, read Nested Defaults Blocks. The default variations used
+                      for this flag in new environments. If omitted, the first and
+                      last variation will be used
+                    items:
+                      properties:
+                        offVariation:
+                          description: The index of the variation the flag will default
+                            to in all new environments when off. The index of the
+                            variation served when the flag is off for new environments
+                          type: number
+                        onVariation:
+                          description: The index of the variation the flag will default
+                            to in all new environments when on. The index of the variation
+                            served when the flag is on for new environments
+                          type: number
+                      type: object
+                    type: array
+                  description:
+                    description: The feature flag's description. A short description
+                      of what the flag will be used for
+                    type: string
+                  id:
+                    description: The unique feature flag ID in the format project_key/flag_key.
+                    type: string
+                  includeInSnippet:
+                    description: Deprecated  Specifies whether this flag should be
+                      made available to the client-side JavaScript SDK using the client-side
+                      Id. This value gets its default from your project configuration
+                      if not set. include_in_snippet is now deprecated. Please migrate
+                      to client_side_availability.using_environment_id to maintain
+                      future compatability. Whether or not this flag should be made
+                      available to the client-side JavaScript SDK
+                    type: boolean
+                  key:
+                    description: The unique feature flag key that references the flag
+                      in your application code. A change in this field will force
+                      the destruction of the existing resource and the creation of
+                      a new one. A unique key that will be used to reference the flag
+                      in your code
+                    type: string
+                  maintainerId:
+                    description: The feature flag maintainer's 24 character alphanumeric
+                      team member ID. The LaunchDarkly id of the user who will maintain
+                      the flag
+                    type: string
+                  name:
+                    description: The human-readable name of the feature flag. A human-friendly
+                      name for the feature flag
+                    type: string
+                  projectKey:
+                    description: The feature flag's project key. A change in this
+                      field will force the destruction of the existing resource and
+                      the creation of a new one. The LaunchDarkly project key
+                    type: string
+                  tags:
+                    description: Set of feature flag tags. Tags associated with your
+                      resource
+                    items:
+                      type: string
+                    type: array
+                  temporary:
+                    description: Specifies whether the flag is a temporary flag. Whether
+                      or not the flag is a temporary flag
+                    type: boolean
+                  variationType:
+                    description: 'The feature flag''s variation type: boolean, string,
+                      number or json. The uniform type for all variations. Can be
+                      either "boolean", "string", "number", or "json".'
+                    type: string
+                  variations:
+                    description: List of nested blocks describing the variations associated
+                      with the feature flag. You must specify at least two variations.
+                      To learn more, read Nested Variations Blocks. An array of possible
+                      variations for the flag
+                    items:
+                      properties:
+                        description:
+                          description: The feature flag's description. A description
+                            for the variation
+                          type: string
+                        name:
+                          description: The human-readable name of the feature flag.
+                            A name for the variation
+                          type: string
+                        value:
+                          description: 'The variation value. The value''s type must
+                            correspond to the variation_type argument. For example:
+                            variation_type = "boolean" accepts only true or false.
+                            The "number" variation type accepts both floats and ints,
+                            but please note that any trailing zeroes on floats will
+                            be trimmed (i.e. 1.1 and 1.100 will both be converted
+                            to 1.1). The value of the flag for this variation'
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: LastTransitionTime is the last time this condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A Message containing details about this condition's
+                        last transition from one status to another, if any.
+                      type: string
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: Type of this condition. At most one of each condition
+                        type may apply to a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
